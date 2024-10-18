@@ -24,7 +24,11 @@ export const signup = async (req, res) => {
                 errMessage: "Email is already taken !!!"
             })
         }
-
+        if (password.length < 6) {
+            return res.status(400).json({
+                errMessage: "Password must be at least 6 charactor"
+            })
+        }
         //mã hóa pass trc khi post lên database, dùng bcrypt
         const salt = await bcrypt.genSalt(10)
         const hashedPassword = await bcrypt.hash(password, salt)
@@ -71,13 +75,65 @@ export const signup = async (req, res) => {
 }
 
 export const login = async (req, res) => {
-    return res.json({
-        data: "this is page login bro"
-    })
+    try {
+        const { userName, password } = req.body
+        const user = await User.findOne({ userName })
+        const isCheckPass = await bcrypt.compare(password, user?.password || " ")
+        if (!user || !isCheckPass) {
+            return res.status(400).json({
+                errMessage: "Invalid username or password !!!"
+            })
+        }
+        generateTokenAndSetCookie(user._id, res)
+        return res.status(200).json({
+            success: true,
+            errMessage: "Login successfull !!!!",
+            data: {
+                id: user._id,
+                userName: user.userName,
+                fullName: user.fullName,
+                email: user.email,
+                followers: user.followers,
+                following: user.following,
+                profileImg: user.profileImg,
+                coverImg: user.coverImg,
+                bio: user.bio,
+                link: user.link,
+            }
+
+        })
+    } catch (error) {
+        console.log('Error from login controller !!!', error.message)
+        return res.status(500).json({
+            error: "Internal Server Error"
+        })
+    }
 }
 
 export const logout = async (req, res) => {
-    return res.json({
-        data: "this is page logout bro"
-    })
+    try {
+        res.cookie("userjwt", "", { maxAge: 0 })
+        return res.status(200).json({
+            errMessage: "Logout successfull !!!"
+        })
+    } catch (error) {
+        console.log('Error from login controller !!!', error.message)
+        return res.status(500).json({
+            error: "Internal Server Error"
+        })
+    }
+}
+
+export const getMe = async (req, res) => {
+    try {
+        const user = await User.findById(req.user._id).select("-password")
+        return res.status(200).json({
+            data: user
+        })
+    } catch (error) {
+        console.log('Error from getme', error.message)
+        return res.status(500).json({
+            error: "Internal Server Error"
+        })
+    }
 }
