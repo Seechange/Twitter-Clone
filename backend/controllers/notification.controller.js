@@ -32,3 +32,31 @@ export const deleteNotification = async (req, res) => {
         })
     }
 }
+
+// export const deleteNotificationById = async(req, res) => {
+//     try {
+//         const idNoti = req.params.id
+//         const userId = req.user._id
+//         const noti = await Notification.findById(idNoti)
+//         if(!noti){
+//             return res.status(400).json({
+//                 errMessage: "Notification not found !!!"
+//             })
+//         }
+//         if(noti.to.toString() !== userId.toString()){
+//             return res.status(400).json({
+//                 errMessage: "User not authorizen delete notification !!!"
+//             })
+//         }
+//         await Notification.findByIdAndDelete({_id: idNoti})
+//         return res.status(200).json({
+//             errMessage: "Deleted Notification successfull !!!"
+//         })
+        
+//     } catch (error) {
+//         console.log('Error from deleteNotificationById controller !!!', error.message)
+//         return res.status(500).json({
+//             error: "Internal Server Error"
+//         })
+//     }
+// }
